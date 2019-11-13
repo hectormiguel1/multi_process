@@ -144,7 +144,7 @@ int insertAt(LinkedList * list, int index, char * data)
     } else
     {
         Node *nextNode = NULL;
-        getElement ( list, nextNode, index );
+        getElement ( list, &nextNode, index );
         if ( nextNode != NULL)
         {
             list->size++;
@@ -193,7 +193,7 @@ void destroyList(LinkedList * list)
  * @param atLocation : location to get.
  * @return SUCCESS if nth element was found, FAILURE otherwise.
  */
-int getElement(LinkedList * fromList, Node * destNode, int atLocation)
+int getElement(LinkedList * fromList, Node ** destNode, int atLocation)
 {
     if(fromList->size > EMPTY && atLocation >= EMPTY)
     {
@@ -204,7 +204,7 @@ int getElement(LinkedList * fromList, Node * destNode, int atLocation)
         {
             if(currentLocation == atLocation)
             {
-                destNode = currentNode;
+                *destNode = currentNode;
                 found = true;
             }
             else
@@ -218,5 +218,168 @@ int getElement(LinkedList * fromList, Node * destNode, int atLocation)
     else
     {
         return FAILURE;
+    }
+}
+
+/**
+ * Checks if the data is found in the LinkedList.
+ * @param fromList : list to search
+ * @param data : data to find
+ * @return SUCCESS if found, FAILURE otherwise.
+ */
+int contains(LinkedList * fromList, char * data)
+{
+    if(fromList->size == EMPTY)
+    {
+        return FAILURE;
+    }
+    else
+    {
+        Node *currentNode = fromList->firstElement;
+        bool found = false;
+
+        while(currentNode != fromList->lastElement && !found)
+        {
+            if(&currentNode->data == &data)
+            {
+                found = true;
+            }
+            else
+            {
+                currentNode = currentNode->next;
+            }
+        }
+        if(found)
+        {
+            return SUCCESS;
+        }
+        else
+        {
+            return FAILURE;
+        }
+    }
+}
+
+/**
+ * Removes the nth element from the list, frees the removed element and updates the first and last pointers
+ * in linked list.
+ * @param fromList: list to remove item from
+ * @param index: location of item in the list.
+ * @return : SUCCESS if item was found and deleted, FAILURE otherwise.
+ */
+int removeElement(LinkedList * fromList, int index)
+{
+    if(index > fromList->size || index < EMPTY)
+    {
+        return FAILURE;
+    }
+    else
+    {
+        Node * currentNode = NULL;
+        getElement (fromList,&currentNode, index);
+        if(currentNode != NULL)
+        {
+            currentNode->prev->next = currentNode->next;
+            currentNode->next->prev = currentNode->prev;
+            if(currentNode == fromList->lastElement)
+            {
+                fromList->lastElement = currentNode->prev;
+            }
+            else if(currentNode == fromList->firstElement)
+            {
+                fromList->firstElement = currentNode->next;
+            }
+            fromList->size--;
+            free(currentNode);
+            return SUCCESS;
+        } else
+        {
+            return FAILURE;
+        }
+
+    }
+}
+
+/**
+ * Function removes the last item on the Linked List, updates pointer and frees memory.
+ * @param fromList : linked list to remove last item from
+ * @return : SUCCESS on successfully removal, FAILURE otherwise.
+ */
+int removeLast(LinkedList * fromList)
+{
+    if(fromList->size == EMPTY)
+    {
+        return FAILURE;
+    }
+    else if (fromList->firstElement == fromList->lastElement)
+    {
+        fromList->size--;
+        free(fromList->firstElement);
+        fromList->firstElement = NULL;
+        fromList->lastElement = NULL;
+        return SUCCESS;
+    }
+    else
+    {
+        Node * tmpNode = fromList->lastElement;
+        fromList->lastElement = tmpNode->prev;
+        fromList->lastElement->next = fromList->firstElement;
+        fromList->firstElement->prev = fromList->lastElement;
+        fromList->size--;
+        free(tmpNode);
+        return SUCCESS;
+    }
+}
+
+/**
+ * Removes the first element in the linked list.
+ * @param fromList : List to remove item from
+ * @return : SUCCESS on removal, FAILURE otherwise.
+ */
+int removeFirst(LinkedList * fromList)
+{
+    if(fromList->size == EMPTY)
+    {
+        return FAILURE;
+    }
+    else if (fromList->firstElement == fromList->lastElement)
+    {
+        free(fromList->firstElement);
+        fromList->firstElement = NULL;
+        fromList->lastElement = NULL;
+        return SUCCESS;
+    }
+    else
+    {
+        Node * tmpNode = fromList->firstElement;
+        fromList->firstElement = tmpNode->next;
+        fromList->firstElement->prev = fromList->lastElement;
+        fromList->lastElement->next = fromList->firstElement;
+        fromList->size--;
+        free(tmpNode);
+        return SUCCESS;
+
+    }
+}
+
+/**
+ * Prints the contents of the Linked List. The contents are printed to parameter dest
+ * @param list : pointer to char array where array will be printed.
+ * @param dest : where the array will be printed.
+ */
+void printList(LinkedList * list, char ** dest)
+{
+    if(list->size == EMPTY)
+    {
+        strcpy (*dest,EMPTY_LIST_MSG);
+    }
+    else
+    {
+        Node * currentNode = list->firstElement;
+        int counter = EMPTY;
+        while(currentNode != list->lastElement)
+        {
+            sprintf (*dest,"Data at Node %d: %s \n",counter,currentNode->data);
+        }
     }
 }
